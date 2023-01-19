@@ -29,7 +29,7 @@ void writeM(int mat[][5000], int n, int m)
 
 void create(int mat[][5000], int n, int m, int procMin, int procMax)
 {
-	printf("\n");
+	//printf("\n");
 	long procR,brojNula,br=0,temp;
 
 	srand(clock(NULL));
@@ -62,6 +62,8 @@ void create(int mat[][5000], int n, int m, int procMin, int procMax)
 			mat[rn][rm] = temp;
 		}
 	}
+
+	//writeM(mat, n, m);
 }
 
 //----------------------------------------------------------------------
@@ -151,10 +153,7 @@ void product(int mat[][5000], int n, int m, int procMin, int procMax)
 		for (int j = 0; j < m; j++)
 		{
 			ap[i][j] = mat[i][j];
-			//printf("%d ", A[i][j]);
 		}
-		//printf("\n");
-
 	}
 
 	create(mat, n, m, procMin, procMax);
@@ -164,9 +163,7 @@ void product(int mat[][5000], int n, int m, int procMin, int procMax)
 		for (int j = 0; j < m; j++)
 		{
 			bp[i][j] = mat[i][j];
-			//printf("%d ", B[i][j]);
 		}
-		//printf("\n");
 	}
 	
 	int t1 = clock();
@@ -291,6 +288,80 @@ void sumCSR(long A1[], int IA1[], int JA1[], long A2[], int IA2[], int JA2[], lo
 }
 //-------------------------------------------------------------------
 
+void productCSR(long A1[], int IA1[], int JA1[], long A2[], int IA2[], int JA2[], long A3[], int IA3[], int JA3[], long A[], int IA[], int JA[], int mat[][5000], int n, int m, int procMin, int procMax)
+{
+	create(mat, n, m, procMin, procMax);
+	transformToCSR(mat, m, n, A, IA, JA);
+
+	int br = 0;
+
+	for (int i = 0; A[i] == 1; i++)
+	{
+		A1[i] = A[i];
+		IA1[i] = IA[i];
+		JA1[i] = JA[i];
+		br++;
+	}
+
+
+	int tempa = br;
+
+	create(mat, n, m, procMin, procMax);
+	transformToCSR(mat, m, n, A, IA, JA);
+
+
+	br = 0;
+
+	for (int i = 0; A[i] == 1; i++)
+	{
+		A2[i] = A[i];
+		IA2[i] = IA[i];
+		JA2[i] = JA[i];
+		br++;
+	}
+
+	int tempb = br;
+
+	
+	br = 0;
+	int ind = 0;
+	int t1 = clock();
+	int val = 0;
+	int row_b;
+	int col_b;
+	for (int i = 0; i < tempa; i++) 
+	{
+		val = 0;
+
+		int row_a = IA1[i];
+		int col_a = JA1[i];
+		double val_a_ = A1[i];
+		for (int j = 0; j < tempb; j++) 
+		{
+			 row_b = IA2[j];
+			 col_b = JA2[j];
+			double val_b_ = A2[j];
+			if (col_a == row_b) 
+			{
+				val += A1[i] * A2[j];
+			}
+		}
+
+		A3[ind] = val;
+		IA[ind] = row_a;
+		JA[ind] = col_b;
+		ind++;
+	}
+
+
+	int t2 = clock();
+
+
+	
+	printf("\nPocetno vrijeme je %d , izlazno vrijeme je %d, vrijeme izvrsavanja programa je %d", t1, t2, t2 - t1);
+}
+
+//--------------------------------------------------------------------
 
 long A[80000000];
 long A1[80000000];
@@ -304,15 +375,14 @@ int mat[5000][5000];
 int main()
 {
 	
-	int n = 500, m = 500, procMin =40, procMax =50;
+	int n = 70, m = 70, procMin =80, procMax =90;
 	
 	sum(mat, m, n, procMin, procMax);
-	
-	
 	sumCSR(A1, IA1, JA1, A2, IA2, JA2, A3, IA3, JA3, A, IA, JA, mat, n, m, procMin, procMax);
-	
-
+	productCSR(A1, IA1, JA1, A2, IA2, JA2, A3, IA3, JA3, A, IA, JA, mat, n, m, procMin, procMax);
 	product(mat, n, m, procMin, procMax);
+	
+	
 	
 	return 0;
 }
